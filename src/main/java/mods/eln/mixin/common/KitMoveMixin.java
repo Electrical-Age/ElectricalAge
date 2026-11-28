@@ -1,4 +1,4 @@
-package mods.eln.mixin;
+package mods.eln.mixin.common;
 
 import mods.eln.node.voxel.KitItem;
 import net.minecraft.world.inventory.AbstractContainerMenu;

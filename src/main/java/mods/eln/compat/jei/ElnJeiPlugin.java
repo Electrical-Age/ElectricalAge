@@ -15,7 +15,7 @@ import net.minecraft.resources.Identifier;
 
 /**
  * JEI (loaded only when JEI is installed): the cable-kit recipes, which are custom recipes JEI can't list itself, as
- * examples in the crafting category (Baughn: they weren't in JEI; the grid takes whole stacks all the same); and the
+ * examples in the crafting category (Baughn: they weren't in JEI); and the
  * Tree Resin Collector as a machine making tree resin (ResinCategory). What it shows beyond the game's recipes is in
  * JeiPages, which the GameTest jei_every_item_reachable checks.
  */

@@ -74,6 +74,8 @@ public final class KitRecipes {
                            net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
                            net.minecraft.world.entity.player.Player player) {
         if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
+        // (kit onto kit: whichever is carried pours into the one in the slot)
+        if (units.getItem() instanceof KitItem) return KitItem.clickedKit(slot.getItem() == kit ? units : kit, slot.getItem(), slot, action, player);
         if (absorb(kit, kitTier, units, unitTier, per, take) == 0) return false;
         player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
         return true;

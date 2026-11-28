@@ -201,12 +201,9 @@ public final class ToolbagShears {
         var c = ToolbagItem.contents(bag);
         int len = KitItem.length(k);
         for (int i = 0; i < ToolbagItem.KITS && len > 0; i++) {
-            ItemStack s = c.get(i);
-            if (s.isEmpty() || !KitItem.same(s, k)) continue;
-            int t = Math.min(KitItem.MAX - KitItem.length(s), len);
-            if (t <= 0) continue;
-            KitItem.setLength(s, KitItem.length(s) + t);
-            len -= t;
+            ItemStack rest = k.copy();
+            KitItem.setLength(rest, len);
+            len -= KitItem.pour(rest, c.get(i));
         }
         for (int i = 0; i < ToolbagItem.KITS && len > 0; i++) {
             if (!c.get(i).isEmpty()) continue;

@@ -1277,4 +1277,4 @@ on 1.7.10) onto 26.x.
   Whole stacks go in by clicking them onto a kit. Kits of a kind merge through `KitItem.pour`: in a player's inventory
   once a second (the held kit takes the others), in the Toolbag as it changes, on shift-click toward slots holding a
   kit (`KitMoveMixin` on `AbstractContainerMenu.moveItemStackTo`, all or nothing), in other containers' slots as they
-  close, and on pickup. To split a kit for someone, throw the crafted one. GameTests `cable_kits`, `pipe_kit_crafting`.
+  close (plain containers, and Sophisticated storage slots by class name), kit clicked on kit, and on pickup. To split a kit for someone, throw the crafted one. GameTests `cable_kits`, `pipe_kit_crafting`.

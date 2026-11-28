@@ -46,9 +46,8 @@ public final class PipeKitRecipes {
 
     /**
      * Pipe kits from plates (Baughn: pipe kits didn't stack up or craft many at a time; cable kits had been fixed):
-     * plates of one tier, with or without a kit of that tier, make a kit a block longer per PER_BLOCK plates, from whole
-     * stacks, as many as fit in one kit (at least one plate from every slot: the grid takes one from each; the rest by
-     * the crafted event, {@link #crafted}). As CableKitRecipes.FromCoils.
+     * plates of one tier, with or without a kit of that tier, make a kit a block longer per PER_BLOCK plates, one plate
+     * from every slot (KitRecipes.use). As CableKitRecipes.FromCoils.
      */
     public static final class FromPlates extends CustomRecipe {
         public static final FromPlates INSTANCE = new FromPlates(-1);
@@ -74,30 +73,12 @@ public final class PipeKitRecipes {
             return u == null ? null : new int[]{u[u.length - 3], u[u.length - 2]};
         }
 
-        /**
-         * Plates of this tier (and at most one kit), however few: when there are too few for a block it matches with
-         * no result. After a craft the grid asks the matching recipe for its remainders; with too few plates left to
-         * match, vanilla gave the inputs back instead (AdventurAgent: alloy kits left a plate behind).
-         */
+        /** Plates of this tier (and at most one kit) that make whole blocks the kit has room for (KitRecipes.use); not
+         *  when another recipe takes the grid (the own, cheap test first: otherRecipe walks every crafting recipe). */
         @Override
         public boolean matches(CraftingInput input, Level level) {
-            int t = -1, kits = 0, plates = 0;
-            for (int i = 0; i < input.size(); i++) {
-                ItemStack s = input.getItem(i);
-                if (s.isEmpty()) continue;
-                int st;
-                if (s.getItem() instanceof PipeKitItem k) {
-                    if (++kits > 1 || s.getCount() != 1) return false;
-                    st = k.tier;
-                } else {
-                    st = plateTier(s);
-                    if (st < 0) return false;
-                    plates++;
-                }
-                if (t >= 0 && st != t) return false;
-                t = st;
-            }
-            return plates > 0 && (tier < 0 || t == tier) && !otherRecipe(input, level);
+            int[] t = total(input);
+            return t != null && (tier < 0 || t[0] == tier) && !otherRecipe(input, level);
         }
 
         @Override
@@ -156,14 +137,14 @@ public final class PipeKitRecipes {
         return false;
     }
 
-    /** JEI examples: per tier, 9 slots of plates to a kit (kit to plates JEI lists itself, from display(): AdventurAgent saw it twice). */
+    /** JEI examples: per tier, a grid of plates (as many slots as make whole blocks) to a kit (kit to plates JEI lists itself, from display(): AdventurAgent saw it twice). */
     public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
         List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
         var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
         var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_pipe_kit");
         for (int t = 0; t < PLATE_TIERS; t++) {
             var ing = net.minecraft.world.item.crafting.Ingredient.of(plate(t));
-            for (int n : new int[]{9}) {   // (the one-block recipe JEI lists itself, from display(): AdventurAgent saw it twice)
+            for (int n : new int[]{9 - 9 % PER_BLOCK[t]}) {   // (whole blocks; the one-block recipe JEI lists itself, from display())
                 List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
                 for (int i = 0; i < n; i++) ings.add(ing);
                 out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,

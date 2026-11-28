@@ -2022,6 +2022,40 @@ public final class PipeCases {
             // shift-click in a crafting table: the full kit (the rest stays: its plates are another item, so the loop stops)
             var shift = shiftCraft(ctx, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
             ctx.check("pipe: shift-click 63 + 2 blocks: a full kit, the block left over stays in the grid", shift.equals("kits [1024] plates 0 grid [16]"), shift);
+            // plates to kits by shift-click, the path the dup took (Lashtear 2026-11-28): every craft takes a plate a slot
+            // and its kit pours into the one before, so 2 x 10 alloy plates are one 20-block kit and nothing more
+            ItemStack a10 = alloy.copyWithCount(10);
+            var bulk = shiftCraft(ctx, a10.copy(), a10.copy());
+            ctx.check("pipe: shift-click 2 slots of 10 alloy plates: one 20-block kit, no plate left", bulk.equals("kits [320] plates 0 grid []"), bulk);
+            var one = alloy.copyWithCount(1);
+            var single = shiftCraft(ctx, one.copy(), alloy.copyWithCount(64));
+            ctx.check("pipe: shift-click a plate and a stack of 64: 65 blocks, a full kit and one block more", single.equals("kits [16, 1024] plates 0 grid []"), single);
+            // kits in a chest merge as it closes; a result slot's kit is no storage and stays
+            var chest = new net.minecraft.world.inventory.ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, 9, ctx.player().getInventory(),
+                new net.minecraft.world.SimpleContainer(9), 1);
+            chest.getSlot(1).set(PipeKitItem.kit(0, 100));
+            chest.getSlot(5).set(PipeKitItem.kit(1, 60));
+            chest.getSlot(7).set(PipeKitItem.kit(0, 1000));
+            mods.eln.node.voxel.KitItem.closing(ctx.player(), chest.slots);
+            ctx.check("kits merge: a chest's kits of a kind are one as it closes (the rest stays; other tiers apart)",
+                PipeKitItem.length(chest.getSlot(1).getItem()) == 1024 && PipeKitItem.length(chest.getSlot(7).getItem()) == 76 && PipeKitItem.length(chest.getSlot(5).getItem()) == 60,
+                PipeKitItem.length(chest.getSlot(1).getItem()) + " " + PipeKitItem.length(chest.getSlot(7).getItem()));
+            var table = new net.minecraft.world.inventory.CraftingMenu(9, ctx.player().getInventory(),
+                net.minecraft.world.inventory.ContainerLevelAccess.create(ctx.level(), BlockPos.ZERO));
+            table.getSlot(1).set(PipeKitItem.kit(0, 16));
+            table.getSlot(2).set(PipeKitItem.kit(0, 16));
+            table.slotsChanged(table.getSlot(1).container);
+            mods.eln.node.voxel.KitItem.closing(ctx.player(), table.slots);
+            ctx.check("kits merge: a crafting result is not poured from (it would be a free kit)",
+                PipeKitItem.length(table.getSlot(1).getItem()) + PipeKitItem.length(table.getSlot(2).getItem()) == 32,
+                PipeKitItem.length(table.getSlot(0).getItem()) + " " + PipeKitItem.length(table.getSlot(1).getItem()) + " " + PipeKitItem.length(table.getSlot(2).getItem()));
+            // the Toolbag holds one kit of a kind
+            ItemStack bag = new ItemStack(mods.eln.registry.ElnRegistry.TOOLBAG.get());
+            var bm = mods.eln.node.voxel.ToolbagMenu.forTests(ctx.player().getInventory(), bag, 0);
+            bm.getSlot(0).set(PipeKitItem.kit(0, 48));
+            bm.getSlot(3).set(PipeKitItem.kit(0, 32));
+            ctx.check("kits merge: two kits of a kind put in the Toolbag are one", PipeKitItem.length(bm.getSlot(0).getItem()) == 80 && bm.getSlot(3).getItem().isEmpty()
+                && PipeKitItem.length(mods.eln.node.voxel.ToolbagItem.contents(bag).get(0)) == 80, PipeKitItem.length(bm.getSlot(0).getItem()) + " " + bm.getSlot(3).getItem());
             var unroll = shiftCraft(ctx, PipeKitItem.kit(0, 40));
             ctx.check("pipe: shift-click a 2.5-block kit: 4 plates, half a block stays", unroll.equals("kits [] plates 4 grid [8]"), unroll);
         }

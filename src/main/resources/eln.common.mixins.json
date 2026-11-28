@@ -1,7 +1,7 @@
 {
   "required": false,
   "minVersion": "0.8",
-  "package": "mods.eln.mixin",
+  "package": "mods.eln.mixin.common",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "KitMoveMixin"

@@ -113,25 +113,43 @@ public interface KitItem {
         tidy(inv, inv.getContainerSize(), inv.getSelectedItem().getItem() instanceof KitItem ? inv.getSelectedSlot() : -1);
     }
 
+    /** Other mods' slots over real storage that isn't a Container (by class name: no dependency). The kits in them merge
+     *  when their menu closes; their filter and ghost slots, the same classes' siblings, are not listed. */
+    java.util.Set<String> STORAGE_SLOTS = java.util.Set.of("net.p3pp3rf1y.sophisticatedcore.common.gui.StorageInventorySlot");
+
+    /** The slot's container holds this very stack: plain storage, where a set stays (a chest, an inventory; not a
+     *  result, ghost or handler slot, which answer with copies or with nothing behind them). */
+    static boolean owned(net.minecraft.world.inventory.Slot slot) {
+        ItemStack s = slot.getItem();
+        int k = slot.getContainerSlot();
+        return !s.isEmpty() && k >= 0 && k < slot.container.getContainerSize() && slot.container.getItem(k) == s && slot.getItem() == s;
+    }
+
+    static boolean storage(net.minecraft.world.inventory.Slot slot) {
+        for (Class<?> c = slot.getClass(); c != null; c = c.getSuperclass()) if (STORAGE_SLOTS.contains(c.getName())) return true;
+        return false;
+    }
+
     /**
      * Shift-click (AbstractContainerMenu.moveItemStackTo, KitMoveMixin): a kit that fits whole into the kits of its
      * kind among the target slots goes into them (true: all of it went). All or nothing: a caller that is told "not
-     * moved" doesn't finish its take, so a part poured out of a crafting result would be a free one.
+     * moved" doesn't finish its take, so a part poured out of a crafting result would be a free one. Only into slots
+     * whose container owns the stack ({@link #owned}).
      */
     static boolean pourIntoSlots(ItemStack kit, java.util.List<net.minecraft.world.inventory.Slot> slots, int start, int end, boolean reverse) {
         if (!(kit.getItem() instanceof KitItem) || kit.getCount() != 1 || start < 0 || end > slots.size()) return false;
         int room = 0;
         for (int i = start; i < end; i++) {
-            ItemStack o = slots.get(i).getItem();
-            if (o != kit && o.getCount() == 1 && same(o, kit) && slots.get(i).mayPlace(kit)) room += MAX - length(o);
+            var slot = slots.get(i);
+            ItemStack o = slot.getItem();
+            if (o != kit && o.getCount() == 1 && same(o, kit) && owned(slot) && slot.mayPlace(kit)) room += MAX - length(o);
         }
         if (room < length(kit)) return false;
         for (int k = 0; k < end - start && !kit.isEmpty(); k++) {
             var slot = slots.get(reverse ? end - 1 - k : start + k);
             ItemStack o = slot.getItem();
-            if (o == kit || o.getCount() != 1 || !same(o, kit) || !slot.mayPlace(kit)) continue;
-            ItemStack grown = o.copy();
-            if (pour(kit, grown) > 0) slot.set(grown);
+            if (o == kit || o.getCount() != 1 || !same(o, kit) || !owned(slot) || !slot.mayPlace(kit)) continue;
+            if (pour(kit, o) > 0) slot.setChanged();
         }
         return kit.isEmpty();
     }
@@ -142,36 +160,59 @@ public interface KitItem {
     }
 
     /**
-     * A container closing (server): the kits in its own slots (a backpack's, a chest's; not the player's inventory,
-     * which {@link #tick} keeps) merge. Through the slots, and only where both take a kit placed by hand (not a result
-     * slot) and show what was set: a slot that doesn't keep it is left alone and the other put back.
+     * A container closing (server): the kits in its own slots (a chest's, a backpack's; not the player's inventory,
+     * which {@link #tick} keeps) merge. Only between slots of real storage: the container owns the stack
+     * ({@link #owned}), or the slot's class is a known storage slot ({@link #STORAGE_SLOTS}), where each set is read
+     * back and undone if it didn't hold.
      */
     static void onClose(net.neoforged.neoforge.event.entity.player.PlayerContainerEvent.Close e) {
         var p = e.getEntity();
-        if (p.level().isClientSide()) return;
-        var slots = e.getContainer().slots;
+        if (p.level().isClientSide() || p.isSpectator()) return;
+        closing(p, e.getContainer().slots);
+    }
+
+    /** {@link #onClose}'s work (tests). */
+    public static void closing(net.minecraft.world.entity.player.Player p, java.util.List<net.minecraft.world.inventory.Slot> slots) {
         for (int a = 0; a < slots.size(); a++) {
             var sa = slots.get(a);
             if (sa.container == p.getInventory() || !(sa.getItem().getItem() instanceof KitItem)) continue;
             for (int b = a + 1; b < slots.size(); b++) {
                 var sb = slots.get(b);
                 ItemStack into = sa.getItem(), from = sb.getItem();
-                if (sb.container == p.getInventory() || from == into || !(from.getItem() instanceof KitItem) || !same(from, into)
+                if (sb.container == p.getInventory() || from == into || into.getCount() != 1 || !(from.getItem() instanceof KitItem) || !same(from, into)
                     || !sa.mayPlace(into) || !sb.mayPlace(from) || !sa.mayPickup(p) || !sb.mayPickup(p)) continue;
+                if (owned(sa) && owned(sb)) {
+                    if (pour(from, into) <= 0) continue;
+                    if (from.isEmpty()) sb.set(ItemStack.EMPTY);
+                    sa.setChanged();
+                    sb.setChanged();
+                    continue;
+                }
+                if (!storage(sa) || !storage(sb)) continue;
                 ItemStack was = into.copy(), grown = into.copy(), rest = from.copy();
                 if (pour(rest, grown) <= 0) continue;
                 sa.set(grown);
                 if (sa.getItem().getCount() != 1 || length(sa.getItem()) != length(grown)) {
                     sa.set(was);
-                    break;
+                    return;
                 }
                 sb.set(rest.isEmpty() ? ItemStack.EMPTY : rest);
                 if (rest.isEmpty() ? !sb.getItem().isEmpty() : length(sb.getItem()) != length(rest)) {
                     sa.set(was);
-                    break;
+                    return;
                 }
             }
         }
+    }
+
+    /** A kit clicked onto a kit of its kind (either way round) pours into it (in a chest: the gesture one tries first). */
+    static boolean clickedKit(ItemStack carried, ItemStack inSlot, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
+                              net.minecraft.world.entity.player.Player player) {
+        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player) || !owned(slot)) return false;
+        if (pour(carried, inSlot) <= 0) return false;
+        slot.setChanged();
+        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
+        return true;
     }
 
     /**
@@ -182,6 +223,7 @@ public interface KitItem {
         var ent = e.getItemEntity();
         ItemStack s = ent.getItem();
         if (!(s.getItem() instanceof KitItem) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
+        if (ent.getTarget() != null && !ent.getTarget().equals(e.getPlayer().getUUID())) return;   // (meant for someone else)
         int before = length(s);
         ItemStack rest = s.copy();
         var inv = e.getPlayer().getInventory();
